@@ -1,4 +1,8 @@
 from .exceptions import IncompleteExpressionError, InvalidOperationError
+import operator
+import math
+import cmath
+import numpy as np
 
 
 class Node():
@@ -107,7 +111,7 @@ class BinaryNode(Node):
     Node.
     """
 
-    def __init__(self, left: Node | None, right: Node | None) -> None:
+    def __init__(self, left: Node | None, right: Node | None, operator: str) -> None:
         if (left is None) and (right is not None):
             self.left: EmptySlot = EmptySlot()
         elif (right is None) and (left is not None):
@@ -118,6 +122,8 @@ class BinaryNode(Node):
         else:
             self.left: Node = left
             self.right: Node = right
+        
+        self.operator: str = operator
 
     @property
     def is_complete(self) -> bool:
@@ -135,16 +141,58 @@ class BinaryNode(Node):
         Returns the LaTeX representation of the BinaryNode.
         """
 
-        raise NotImplementedError()
+        LaTeX_symbols = {
+            "+": "+",
+            "-": "-",
+            "*": r"\times",
+            "/": r"\div",
+            "^": "^",
+            "=": "=",
+            ">": ">",
+            "<": "<",
+            ">=": r"\geq",
+            "<=": r"\leq",
+            "neq": r"\neq",
+            "in": r"\in",
+            "union": r"\cup",
+            "intersect": r"\cap",
+            "derivative": r"\frac{d}{dx}",
+            "integral": r"\int",
+            "sum": r"\sum"
+        }
+        
+        if self.operator not in LaTeX_symbols:
+            raise InvalidOperationError("Operation not supported.")
+
+        symbol = LaTeX_symbols[self.operator]
+        return f"{self.left.to_latex} {symbol} {self.right.to_latex}"
 
     @property
     def evaluate(self) -> float:
         """
-        Raises a NotImplementedError() when
-        trying to evaluate a BinaryNode.
+        Evaluates the operation of the BinaryNode.
         """
 
-        raise NotImplementedError()
+        math_operations = {
+            "+": operator.add,
+            "-": operator.sub,
+            "*": operator.mul,
+            "/": operator.truediv,
+            "^": operator.pow,
+            "sqrt": lambda left, right: left ** 0.5,
+            "=": operator.eq,
+            ">": operator.gt,
+            "<": operator.lt,
+            ">=": operator.ge,
+            "<=": operator.le,
+            "neq": operator.ne
+        }
+
+        if self.operator not in math_operations:
+            raise InvalidOperationError("Operation not supported.")
+        
+        operation_function = math_operations[self.operator]
+        return operation_function(self.left.evaluate, self.right.evaluate)
 
 
 class UnaryNode(Node):
@@ -154,11 +202,13 @@ class UnaryNode(Node):
     Node.
     """
 
-    def __init__(self, argument: Node | None) -> None:
+    def __init__(self, operator: str, argument: Node | None) -> None:
         if argument is None:
             self.argument: EmptySlot = EmptySlot()
         else:
             self.argument: Node = argument
+        
+        self.operator: str = operator
 
     @property
     def is_complete(self) -> bool:
@@ -166,9 +216,7 @@ class UnaryNode(Node):
         Defines if a UnaryNode is complete or not.
         """
         
-        if self.argument.is_complete:
-            return True
-        return False
+        return self.argument.is_complete
 
     @property
     def to_latex(self) -> str:
@@ -176,16 +224,89 @@ class UnaryNode(Node):
         Returns the LaTeX representation of the UnaryNode.
         """
 
-        raise NotImplementedError()
+        LaTeX_symbols = {
+            "sqrt": r"\sqrt",
+            "cbrt": r"\cbrt",
+            "abs": r"\left| \right|",
+            "log": r"\log",
+            "ln": r"\ln",
+            "exp": r"\exp",
+            "factorial": r"!",
+            "neg": r"-",
+            "sin": r"\sin",
+            "cos": r"\cos",
+            "tan": r"\tan",
+            "csc": r"\csc",
+            "sec": r"\sec",
+            "cot": r"\cot",
+            "sinh": r"\sinh",
+            "cosh": r"\cosh",
+            "tanh": r"\tanh",
+            "csch": r"\csch",
+            "sech": r"\sech",
+            "coth": r"\coth",
+            "arcsin": r"\arcsin",
+            "arccos": r"\arccos",
+            "arctan": r"\arctan",
+            "arccsc": r"\arccsc",
+            "arcsec": r"\arcsec",
+            "arccot": r"\arccot",
+            "arsinh": r"\arsinh",
+            "arcosh": r"\arcosh",
+            "artanh": r"\artanh",
+            "arcsch": r"\arcsch",
+            "arsech": r"\arsech",
+            "arcoth": r"\arcoth",
+            "floor": r"\lfloor \rfloor",
+            "ceil": r"\lceil \rceil"
+        }
+
+        if self.operator not in LaTeX_symbols:
+            raise InvalidOperationError("Operation not supported.")
+
+        symbol = LaTeX_symbols[self.operator]
+        return f"{symbol}({self.argument.to_latex})"
 
     @property
     def evaluate(self):
         """
-        Raises a NotImplementedError() when
-        trying to evaluate a UnaryNode.
+        Evaluates the operation of the UnaryNode.
         """
 
-        raise NotImplementedError()
-
+        math_operator = {
+            "sqrt": cmath.sqrt,
+            "cbrt": np.cbrt,
+            "abs": abs,
+            "log": cmath.log,
+            "ln": cmath.ln,
+            "exp": cmath.exp,
+            "factorial": math.factorial,
+            "neg": operator.neg,
+            "sin": r"\sin",
+            "cos": r"\cos",
+            "tan": r"\tan",
+            "csc": r"\csc",
+            "sec": r"\sec",
+            "cot": r"\cot",
+            "sinh": r"\sinh",
+            "cosh": r"\cosh",
+            "tanh": r"\tanh",
+            "csch": r"\csch",
+            "sech": r"\sech",
+            "coth": r"\coth",
+            "arcsin": r"\arcsin",
+            "arccos": r"\arccos",
+            "arctan": r"\arctan",
+            "arccsc": r"\arccsc",
+            "arcsec": r"\arcsec",
+            "arccot": r"\arccot",
+            "arsinh": r"\arsinh",
+            "arcosh": r"\arcosh",
+            "artanh": r"\artanh",
+            "arcsch": r"\arcsch",
+            "arsech": r"\arsech",
+            "arcoth": r"\arcoth",
+            "floor": r"\lfloor \rfloor",
+            "ceil": r"\lceil \rceil"
+        }
     
- 
