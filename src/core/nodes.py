@@ -8,7 +8,6 @@ import numpy as np
 
 from .exceptions import (
     IncompleteExpressionError,
-    InvalidNumberError,
     InvalidOperationError,
     UnboundVariableError,
 )
@@ -61,8 +60,8 @@ class NumberNode(Node):
         if isinstance(value, str) and (value not in possible_constants):
             try:
                 float(value)
-            except InvalidNumberError as exception:
-                raise InvalidNumberError(f"Invalid expression: {value}") from exception
+            except ValueError as exception:
+                raise ValueError(f"Invalid expression: {value}") from exception
 
         self.value: float | str = value
 

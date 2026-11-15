@@ -10,6 +10,7 @@ from src.core.exceptions import (
 from src.core.nodes import (
     BinaryNode,
     EmptySlot,
+    Node,
     NumberNode,
     UnaryNode,
     VariableNode,
@@ -20,6 +21,22 @@ Module created to test the functionality
 of Base Classes of Nodes for the
 calculator.
 """
+
+
+def test_node_class_is_abstract() -> None:
+    with pytest.raises(TypeError):
+        _ = Node()
+
+
+def test_number_invalid_string_does_not_work() -> None:
+    """
+    Test created to evaluate if a NumberNode
+    with an invalid input of string is
+    created or not
+    """
+
+    with pytest.raises(ValueError):
+        NumberNode("abc")
 
 
 def test_number_is_complete() -> None:
