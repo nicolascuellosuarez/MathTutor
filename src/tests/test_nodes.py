@@ -71,6 +71,17 @@ def test_number_LaTeX_is_right() -> None:
     assert number_node.to_latex == "5"
 
 
+def test_number_node_string_digit_evaluates_to_float() -> None:
+    """
+    Test created to evaluate if a NumberNode
+    with a string digit as a value evaluates
+    to a float number or not.
+    """
+
+    number_node = NumberNode("2")
+    assert number_node.evaluate == 2.0
+
+
 def test_number_node_constant_pi_LaTeX_is_correct() -> None:
     """
     Test created to evaluate if a NumberNode with
@@ -258,6 +269,18 @@ def test_binary_node_sum_is_complete() -> None:
     assert binary_node_for_proof.is_complete == True
 
 
+def test_binary_node_power_LaTeX_is_correct() -> None:
+    """
+    Test created to evaluate if a BinaryNode
+    with a power operator generates the correct
+    LaTeX representation with curly braces
+    for the exponent.
+    """
+
+    binary_node = BinaryNode(NumberNode(2), NumberNode(3), "^")
+    assert binary_node.to_latex == r"{2}^{3}"
+
+
 def test_binary_node_product_evaluates_well() -> None:
     """
     Test created to evaluate if a BinaryNode
@@ -277,6 +300,17 @@ def test_binary_node_sum_LaTeX_is_correct() -> None:
 
     binary_node_for_proof = BinaryNode(NumberNode(5), NumberNode(2), "+")
     assert binary_node_for_proof.to_latex == "(5 + 2)"
+
+
+def test_binary_node_division_LaTeX_is_correct() -> None:
+    """
+    Test created to evaluate if a BinaryNode
+    with a division operator generates the correct
+    LaTeX representation as a fraction.
+    """
+
+    binary_node = BinaryNode(NumberNode(2), NumberNode(3), "/")
+    assert binary_node.to_latex == r"\frac{2}{3}"
 
 
 def test_anidation_in_binary_node_is_complete() -> None:
@@ -517,5 +551,17 @@ def text_variable_node_evaluate_raises_an_error() -> None:
     """
 
     variable_node = VariableNode("\alpha")
+    with pytest.raises(UnboundVariableError):
+        _ = variable_node.evaluate
+
+
+def test_variable_node_evaluate_raises_unbound_variable_error() -> None:
+    """
+    Test created to evaluate if a VariableNode
+    raises an UnboundVariableError when trying
+    to evaluate it without a value assigned.
+    """
+
+    variable_node = VariableNode("x")
     with pytest.raises(UnboundVariableError):
         _ = variable_node.evaluate
