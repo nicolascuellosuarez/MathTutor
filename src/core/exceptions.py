@@ -21,3 +21,10 @@ class UnboundVariableError(MathTutorError):
     Raised when the user tries to evaluate a variable
     with no value.
     """
+
+
+class InvalidNumberError(MathTutorError):
+    """
+    Raised when the user tries to insert an invalid
+    input in a NumberNode.
+    """
