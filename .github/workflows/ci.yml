@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs_on: ubuntu_latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -37,6 +37,6 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        token: '${{ secrets.CODECOV_TOKEN }}'
         file: ./coverage.xml
         fail_ci_if_error: true
