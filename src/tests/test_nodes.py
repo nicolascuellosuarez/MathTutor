@@ -1,9 +1,21 @@
 import cmath
 
+import numpy as np
 import pytest
 
-from src.core.exceptions import IncompleteExpressionError, InvalidOperationError
-from src.core.nodes import BinaryNode, EmptySlot, Node, NumberNode, UnaryNode
+from src.core.exceptions import (
+    IncompleteExpressionError,
+    InvalidOperationError,
+    UnboundVariableError,
+)
+from src.core.nodes import (
+    BinaryNode,
+    EmptySlot,
+    Node,
+    NumberNode,
+    UnaryNode,
+    VariableNode,
+)
 
 """
 Module created to test the functionality
@@ -72,6 +84,116 @@ def test_number_LaTeX_is_right() -> None:
 
     number_node = NumberNode(5)
     assert number_node.to_latex == "5"
+
+
+def test_number_node_constant_pi_LaTeX_is_correct() -> None:
+    """
+    Test created to evaluate if a NumberNode with
+    pi as a constant's LaTeX representation is right
+    or not.
+    """
+
+    number_node = NumberNode("pi")
+    assert number_node.to_latex == r"\pi"
+
+
+def test_number_node_constant_e_LaTeX_is_correct() -> None:
+    """
+    Test created to evaluate if a NumberNode with
+    e as a constant's LaTeX representation is right
+    or not.
+    """
+
+    number_node = NumberNode("e")
+    assert number_node.to_latex == r"e"
+
+
+def test_number_node_constant_phi_LaTeX_is_correct() -> None:
+    """
+    Test created to evaluate if a NumberNode with
+    phi as a constant's LaTeX representation is right
+    or not.
+    """
+
+    number_node = NumberNode("phi")
+    assert number_node.to_latex == r"\phi"
+
+
+def test_number_node_constant_i_LaTeX_is_correct() -> None:
+    """
+    Test created to evaluate if a NumberNode with
+    i as a constant's LaTeX representation is right
+    or not.
+    """
+
+    number_node = NumberNode("i")
+    assert number_node.to_latex == r"i"
+
+
+def test_number_node_constant_gamma_LaTeX_is_correct() -> None:
+    """
+    Test created to evaluate if a NumberNode with
+    gamma as a constant's LaTeX representation is right
+    or not.
+    """
+
+    number_node = NumberNode("gamma")
+    assert number_node.to_latex == r"\gamma"
+
+
+def test_number_node_constant_pi_evaluates_well() -> None:
+    """
+    Test created to evaluate if a NumberNode with
+    pi as a constant evaluates to the correct numeric
+    value or not.
+    """
+
+    number_node = NumberNode("pi")
+    assert number_node.evaluate == cmath.pi
+
+
+def test_number_node_constant_e_evaluates_well() -> None:
+    """
+    Test created to evaluate if a NumberNode with
+    e as a constant evaluates to the correct numeric
+    value or not.
+    """
+
+    number_node = NumberNode("e")
+    assert number_node.evaluate == cmath.e
+
+
+def test_number_node_constant_phi_evaluates_well() -> None:
+    """
+    Test created to evaluate if a NumberNode with
+    phi as a constant evaluates to the correct numeric
+    value or not.
+    """
+
+    number_node = NumberNode("phi")
+    assert number_node.evaluate == (1 + cmath.sqrt(5)) / 2
+
+
+def test_number_node_constant_i_evaluates_well() -> None:
+    """
+    Test created to evaluate if a NumberNode with
+    i as a constant evaluates to the correct numeric
+    value or not.
+    """
+
+    number_node = NumberNode("i")
+    assert number_node.evaluate == 1j
+
+
+def test_number_node_constant_gamma_evaluates_well() -> None:
+    """
+    Test created to evaluate if a NumberNode with
+    gamma as a constant evaluates to the correct numeric
+    value or not.
+    """
+
+    number_node = NumberNode("gamma")
+    assert number_node.evaluate == np.euler_gamma
 
 
 def test_empty_slot_is_complete() -> None:
@@ -380,3 +502,57 @@ def test_unary_node_invalid_operator_evaluate() -> None:
     node = UnaryNode("operador_falso", NumberNode(2))
     with pytest.raises(InvalidOperationError):
         _ = node.evaluate
+
+
+def test_variable_node_is_complete() -> None:
+    """
+    Test created to evaluate if a VariableNode
+    created correctly is complete or not.
+    """
+
+    variable_node = VariableNode("x")
+    assert variable_node.is_complete == True
+
+
+def test_variable_node_LaTeX_is_correct() -> None:
+    """
+    Test created to evaluate if a VariableNode's
+    LaTeX representation is right or not.
+    """
+
+    variable_node = VariableNode("x")
+    assert variable_node.to_latex == "x"
+
+
+def test_variable_node_greek_LaTeX_is_correct() -> None:
+    """
+    Test created to evaluate if a VariableNode with
+    a greek letter as a value's LaTeX representation
+    is righ or not.
+    """
+
+    variable_node = VariableNode("alpha")
+    assert variable_node.to_latex == r"\alpha"
+
+
+def test_variable_node_greek_upper_LaTeX_is_correct() -> None:
+    """
+    Test created to evaluate if a VariableNode with
+    an upper greek letter as a value's LaTeX
+    representation is righ or not.
+    """
+
+    variable_node = VariableNode("Alpha")
+    assert variable_node.to_latex == r"A"
+
+
+def text_variable_node_evaluate_raises_an_error() -> None:
+    """
+    Test created to evaluate if the evaluate function
+    of a VariableNode raises an UnboundVariableError
+    or not.
+    """
+
+    variable_node = VariableNode("\alpha")
+    with pytest.raises(UnboundVariableError):
+        _ = variable_node.evaluate

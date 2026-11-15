@@ -427,7 +427,7 @@ class VariableNode(Node):
         or not.
         """
 
-        return True
+        return bool(self.name)
 
     @property
     def to_latex(self) -> str:
