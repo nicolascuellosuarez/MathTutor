@@ -1,7 +1,8 @@
 import cmath
 import math
 import operator
-from typing import ClassVar
+from typing import ClassVar, Never
+from abc import ABC, abstractmethod
 
 import numpy as np
 
@@ -12,7 +13,7 @@ from .exceptions import (
 )
 
 
-class Node:
+class Node(ABC):
     """
     Class Node created to represent an element for
     the calculation tree. It is an abstract class that defines
@@ -20,6 +21,7 @@ class Node:
     """
 
     @property
+    @abstractmethod
     def is_complete(self) -> bool:
         """
         Defines if a node is complete or not.
@@ -28,6 +30,7 @@ class Node:
         raise NotImplementedError
 
     @property
+    @abstractmethod
     def to_latex(self) -> str:
         """
         Returns the LaTeX representation of the node.
@@ -36,7 +39,8 @@ class Node:
         raise NotImplementedError
 
     @property
-    def evaluate(self) -> str:
+    @abstractmethod
+    def evaluate(self) -> int | float | complex | bool:
         """
         Returns the evaluation of the node.
         """
@@ -73,7 +77,6 @@ class NumberNode(Node):
             "e": r"e",
             "phi": r"\phi",
             "i": r"i",
-            "gamma": r"\gamma",
         }
 
         if self.value in possible_constants:
@@ -81,7 +84,7 @@ class NumberNode(Node):
         return str(self.value)
 
     @property
-    def evaluate(self) -> float:
+    def evaluate(self) -> int | float | complex | bool:
         """
         Returns the evaluation of the number node.
         """
@@ -91,11 +94,12 @@ class NumberNode(Node):
             "e": cmath.e,
             "phi": (1 + cmath.sqrt(5)) / 2,
             "i": cmath.sqrt(-1),
-            "gamma": np.euler_gamma,
         }
 
         if self.value in possible_constants:
             return possible_constants[self.value]
+        elif isinstance(self.value, str):
+            return float(self.value)
         return self.value
 
 
@@ -122,7 +126,7 @@ class EmptySlot(Node):
         return r"\square"
 
     @property
-    def evaluate(self) -> float:
+    def evaluate(self) -> Never:
         """
         Returns an IncompleteExpressionError when
         trying to evaluate an empty node.
@@ -191,11 +195,17 @@ class BinaryNode(Node):
         if self.operator not in LaTeX_symbols:
             raise InvalidOperationError("Operation not supported.")
 
+        
+        if self.operator == "^":
+            return f"{{{self.left.to_latex}}}^{{{self.right.to_latex}}}"
+        elif self.operator == "/":
+            return f"\\frac{{{self.left.to_latex}}}{{{self.right.to_latex}}}"
+
         symbol = LaTeX_symbols[self.operator]
         return f"({self.left.to_latex} {symbol} {self.right.to_latex})"
 
     @property
-    def evaluate(self) -> float:
+    def evaluate(self) -> int | float | complex | bool:
         """
         Evaluates the operation of the BinaryNode.
         """
@@ -297,7 +307,7 @@ class UnaryNode(Node):
         elif self.operator == "cbrt":
             return f"\\sqrt[3]{{{self.argument.to_latex}}}"
         elif self.operator == "abs":
-            return f"\\left| {self.argument.to_latex} \\right|"
+            return f"\\left|{self.argument.to_latex}\\right|"
         elif self.operator == "floor":
             return f"\\lfloor {self.argument.to_latex} \\rfloor"
         elif self.operator == "ceil":
@@ -310,7 +320,7 @@ class UnaryNode(Node):
         return f"{symbol}({self.argument.to_latex})"
 
     @property
-    def evaluate(self):
+    def evaluate(self) -> int | float | complex | bool:
         """
         Evaluates the operation of the UnaryNode.
         """
@@ -441,7 +451,7 @@ class VariableNode(Node):
         return f"{self.name}"
 
     @property
-    def evaluate(self) -> None:
+    def evaluate(self) -> Never:
         """
         Returns the evaluation of a VariableNode,
         not implemented.
