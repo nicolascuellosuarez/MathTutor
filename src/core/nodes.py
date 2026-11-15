@@ -1,10 +1,15 @@
 import cmath
 import math
 import operator
+from typing import ClassVar
 
 import numpy as np
 
-from .exceptions import IncompleteExpressionError, InvalidOperationError
+from .exceptions import (
+    IncompleteExpressionError,
+    InvalidOperationError,
+    UnboundVariableError,
+)
 
 
 class Node:
@@ -46,8 +51,8 @@ class NumberNode(Node):
     the interface defined in the abstract class.
     """
 
-    def __init__(self, value: float) -> None:
-        self.value: float = value
+    def __init__(self, value: float | str) -> None:
+        self.value: float | str = value
 
     @property
     def is_complete(self) -> bool:
@@ -63,14 +68,34 @@ class NumberNode(Node):
         Returns the LaTeX representation of the number node.
         """
 
+        possible_constants = {
+            "pi": r"\pi",
+            "e": r"e",
+            "phi": r"\phi",
+            "i": r"i",
+            "gamma": r"\gamma",
+        }
+
+        if self.value in possible_constants:
+            return str(possible_constants[self.value])
         return str(self.value)
 
     @property
-    def evaluate(self) -> str:
+    def evaluate(self) -> float:
         """
         Returns the evaluation of the number node.
         """
 
+        possible_constants = {
+            "pi": cmath.pi,
+            "e": cmath.e,
+            "phi": (1 + cmath.sqrt(5)) / 2,
+            "i": cmath.sqrt(-1),
+            "gamma": np.euler_gamma,
+        }
+
+        if self.value in possible_constants:
+            return possible_constants[self.value]
         return self.value
 
 
@@ -332,3 +357,94 @@ class UnaryNode(Node):
 
         operation_function = math_operator[self.operator]
         return operation_function(self.argument.evaluate)
+
+
+class VariableNode(Node):
+    """
+    Class VariableNode created to represent a
+    variable in the calculator. It is a
+    subclass of Node.
+    """
+
+    dictionary_of_greek_letters: ClassVar = {
+        "alpha": r"\alpha",
+        "Alpha": r"A",
+        "beta": r"\beta",
+        "Beta": r"B",
+        "gamma": r"\gamma",
+        "Gamma": r"\Gamma",
+        "delta": r"\delta",
+        "Delta": r"\Delta",
+        "epsilon": r"\epsilon",
+        "Epsilon": r"E",
+        "zeta": r"\zeta",
+        "Zeta": r"Z",
+        "eta": r"\eta",
+        "Eta": r"H",
+        "theta": r"\theta",
+        "Theta": r"\Theta",
+        "iota": r"\iota",
+        "Iota": r"I",
+        "kappa": r"\kappa",
+        "Kappa": r"K",
+        "lambda": r"\lambda",
+        "Lambda": r"\Lambda",
+        "mu": r"\mu",
+        "Mu": r"M",
+        "nu": r"\nu",
+        "Nu": r"N",
+        "xi": r"\xi",
+        "Xi": r"\Xi",
+        "omicron": r"o",
+        "Omicron": r"O",
+        "pi": r"\pi",
+        "Pi": r"\Pi",
+        "rho": r"\rho",
+        "Rho": r"P",
+        "sigma": r"\sigma",
+        "Sigma": r"\Sigma",
+        "tau": r"\tau",
+        "Tau": r"T",
+        "upsilon": r"\upsilon",
+        "Upsilon": r"Y",
+        "phi": r"\phi",
+        "Phi": r"\Phi",
+        "chi": r"\chi",
+        "Chi": r"X",
+        "psi": r"\psi",
+        "Psi": r"\Psi",
+        "omega": r"\omega",
+        "Omega": r"\Omega",
+    }
+
+    def __init__(self, name: str) -> None:
+        self.name: str = name
+
+    @property
+    def is_complete(self) -> bool:
+        """
+        Defines if a VariableNode is complete
+        or not.
+        """
+
+        return True
+
+    @property
+    def to_latex(self) -> str:
+        """
+        Returns the LaTeX representation of a
+        VariableNode.
+        """
+
+        if self.name in VariableNode.dictionary_of_greek_letters:
+            return VariableNode.dictionary_of_greek_letters[self.name]
+        return f"{self.name}"
+
+    @property
+    def evaluate(self) -> None:
+        """
+        Returns the evaluation of a VariableNode,
+        not implemented.
+        """
+
+        raise UnboundVariableError(f"La variable {self.name} no tiene valor.")
