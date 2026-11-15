@@ -1,8 +1,8 @@
 import cmath
 import math
 import operator
-from typing import ClassVar, Never
 from abc import ABC, abstractmethod
+from typing import ClassVar, Never
 
 import numpy as np
 
@@ -195,7 +195,6 @@ class BinaryNode(Node):
         if self.operator not in LaTeX_symbols:
             raise InvalidOperationError("Operation not supported.")
 
-        
         if self.operator == "^":
             return f"{{{self.left.to_latex}}}^{{{self.right.to_latex}}}"
         elif self.operator == "/":

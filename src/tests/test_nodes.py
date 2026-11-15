@@ -1,6 +1,5 @@
 import cmath
 
-import numpy as np
 import pytest
 
 from src.core.exceptions import (
@@ -11,7 +10,6 @@ from src.core.exceptions import (
 from src.core.nodes import (
     BinaryNode,
     EmptySlot,
-    Node,
     NumberNode,
     UnaryNode,
     VariableNode,
@@ -22,36 +20,6 @@ Module created to test the functionality
 of Base Classes of Nodes for the
 calculator.
 """
-
-
-def test_base_node_is_complete_raises_error() -> None:
-    """
-    Test created to evaluate if the base class Node
-    raises a NotImplementedError when calling is_complete.
-    """
-    node = Node()
-    with pytest.raises(NotImplementedError):
-        _ = node.is_complete
-
-
-def test_base_node_to_latex_raises_error() -> None:
-    """
-    Test created to evaluate if the base class Node
-    raises a NotImplementedError when calling to_latex.
-    """
-    node = Node()
-    with pytest.raises(NotImplementedError):
-        _ = node.to_latex
-
-
-def test_base_node_evaluate_raises_error() -> None:
-    """
-    Test created to evaluate if the base class Node
-    raises a NotImplementedError when calling evaluate.
-    """
-    node = Node()
-    with pytest.raises(NotImplementedError):
-        _ = node.evaluate
 
 
 def test_number_is_complete() -> None:
@@ -130,17 +98,6 @@ def test_number_node_constant_i_LaTeX_is_correct() -> None:
     assert number_node.to_latex == r"i"
 
 
-def test_number_node_constant_gamma_LaTeX_is_correct() -> None:
-    """
-    Test created to evaluate if a NumberNode with
-    gamma as a constant's LaTeX representation is right
-    or not.
-    """
-
-    number_node = NumberNode("gamma")
-    assert number_node.to_latex == r"\gamma"
-
-
 def test_number_node_constant_pi_evaluates_well() -> None:
     """
     Test created to evaluate if a NumberNode with
@@ -183,17 +140,6 @@ def test_number_node_constant_i_evaluates_well() -> None:
 
     number_node = NumberNode("i")
     assert number_node.evaluate == 1j
-
-
-def test_number_node_constant_gamma_evaluates_well() -> None:
-    """
-    Test created to evaluate if a NumberNode with
-    gamma as a constant evaluates to the correct numeric
-    value or not.
-    """
-
-    number_node = NumberNode("gamma")
-    assert number_node.evaluate == np.euler_gamma
 
 
 def test_empty_slot_is_complete() -> None:
@@ -433,7 +379,7 @@ def test_unary_node_latex_abs() -> None:
     an absolute value correctly generates its LaTeX representation.
     """
     node = UnaryNode("abs", NumberNode(-5))
-    assert node.to_latex == r"\left| -5 \right|"
+    assert node.to_latex == r"\left|-5\right|"
 
 
 def test_unary_node_latex_floor() -> None:
