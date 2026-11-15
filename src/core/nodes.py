@@ -1,14 +1,16 @@
-from .exceptions import IncompleteExpressionError, InvalidOperationError
-import operator
-import math
 import cmath
+import math
+import operator
+
 import numpy as np
 
+from .exceptions import IncompleteExpressionError, InvalidOperationError
 
-class Node():
+
+class Node:
     """
     Class Node created to represent an element for
-    the calculation tree. It is an abstract class that defines 
+    the calculation tree. It is an abstract class that defines
     the interface for all nodes in the tree.
     """
 
@@ -17,7 +19,7 @@ class Node():
         """
         Defines if a node is complete or not.
         """
-        
+
         raise NotImplementedError
 
     @property
@@ -43,8 +45,8 @@ class NumberNode(Node):
     in the calculation tree. It is a subclass of Node and implements
     the interface defined in the abstract class.
     """
-    
-    def __init__(self, value: int) -> None:
+
+    def __init__(self, value: float) -> None:
         self.value: float = value
 
     @property
@@ -70,7 +72,7 @@ class NumberNode(Node):
         """
 
         return self.value
-    
+
 
 class EmptySlot(Node):
     """
@@ -114,7 +116,9 @@ class BinaryNode(Node):
     def __init__(self, left: Node | None, right: Node | None, operator: str) -> None:
         if (left is None) and (right is not None):
             self.left: EmptySlot = EmptySlot()
+            self.right: Node = right
         elif (right is None) and (left is not None):
+            self.left: Node = left
             self.right: EmptySlot = EmptySlot()
         elif (right is None) and (left is None):
             self.left: EmptySlot = EmptySlot()
@@ -122,7 +126,7 @@ class BinaryNode(Node):
         else:
             self.left: Node = left
             self.right: Node = right
-        
+
         self.operator: str = operator
 
     @property
@@ -131,9 +135,7 @@ class BinaryNode(Node):
         Defines if a BinaryNode is complete or not.
         """
 
-        if (self.left.is_complete == True) and (self.right.is_complete == True):
-            return True
-        return False
+        return self.left.is_complete and self.right.is_complete
 
     @property
     def to_latex(self) -> str:
@@ -158,14 +160,14 @@ class BinaryNode(Node):
             "intersect": r"\cap",
             "derivative": r"\frac{d}{dx}",
             "integral": r"\int",
-            "sum": r"\sum"
+            "sum": r"\sum",
         }
-        
+
         if self.operator not in LaTeX_symbols:
             raise InvalidOperationError("Operation not supported.")
 
         symbol = LaTeX_symbols[self.operator]
-        return f"{self.left.to_latex} {symbol} {self.right.to_latex}"
+        return f"({self.left.to_latex} {symbol} {self.right.to_latex})"
 
     @property
     def evaluate(self) -> float:
@@ -179,18 +181,17 @@ class BinaryNode(Node):
             "*": operator.mul,
             "/": operator.truediv,
             "^": operator.pow,
-            "sqrt": lambda left, right: left ** 0.5,
             "=": operator.eq,
             ">": operator.gt,
             "<": operator.lt,
             ">=": operator.ge,
             "<=": operator.le,
-            "neq": operator.ne
+            "neq": operator.ne,
         }
 
         if self.operator not in math_operations:
             raise InvalidOperationError("Operation not supported.")
-        
+
         operation_function = math_operations[self.operator]
         return operation_function(self.left.evaluate, self.right.evaluate)
 
@@ -207,7 +208,7 @@ class UnaryNode(Node):
             self.argument: EmptySlot = EmptySlot()
         else:
             self.argument: Node = argument
-        
+
         self.operator: str = operator
 
     @property
@@ -215,7 +216,7 @@ class UnaryNode(Node):
         """
         Defines if a UnaryNode is complete or not.
         """
-        
+
         return self.argument.is_complete
 
     @property
@@ -226,7 +227,7 @@ class UnaryNode(Node):
 
         LaTeX_symbols = {
             "sqrt": r"\sqrt",
-            "cbrt": r"\cbrt",
+            "cbrt": r"\sqrt[3]",
             "abs": r"\left| \right|",
             "log": r"\log",
             "ln": r"\ln",
@@ -258,13 +259,29 @@ class UnaryNode(Node):
             "arsech": r"\arsech",
             "arcoth": r"\arcoth",
             "floor": r"\lfloor \rfloor",
-            "ceil": r"\lceil \rceil"
+            "ceil": r"\lceil \rceil",
         }
 
         if self.operator not in LaTeX_symbols:
             raise InvalidOperationError("Operation not supported.")
 
         symbol = LaTeX_symbols[self.operator]
+
+        if self.operator == "sqrt":
+            return f"\\sqrt{{{self.argument.to_latex}}}"
+        elif self.operator == "cbrt":
+            return f"\\sqrt[3]{{{self.argument.to_latex}}}"
+        elif self.operator == "abs":
+            return f"\\left| {self.argument.to_latex} \\right|"
+        elif self.operator == "floor":
+            return f"\\lfloor {self.argument.to_latex} \\rfloor"
+        elif self.operator == "ceil":
+            return f"\\lceil {self.argument.to_latex} \\rceil"
+        elif self.operator == "factorial":
+            return f"{self.argument.to_latex}!"
+        elif self.operator == "neg":
+            return f"-{self.argument.to_latex}"
+
         return f"{symbol}({self.argument.to_latex})"
 
     @property
@@ -277,36 +294,41 @@ class UnaryNode(Node):
             "sqrt": cmath.sqrt,
             "cbrt": np.cbrt,
             "abs": abs,
-            "log": cmath.log,
-            "ln": cmath.ln,
+            "log": cmath.log10,
+            "ln": cmath.log,
             "exp": cmath.exp,
             "factorial": math.factorial,
             "neg": operator.neg,
-            "sin": r"\sin",
-            "cos": r"\cos",
-            "tan": r"\tan",
-            "csc": r"\csc",
-            "sec": r"\sec",
-            "cot": r"\cot",
-            "sinh": r"\sinh",
-            "cosh": r"\cosh",
-            "tanh": r"\tanh",
-            "csch": r"\csch",
-            "sech": r"\sech",
-            "coth": r"\coth",
-            "arcsin": r"\arcsin",
-            "arccos": r"\arccos",
-            "arctan": r"\arctan",
-            "arccsc": r"\arccsc",
-            "arcsec": r"\arcsec",
-            "arccot": r"\arccot",
-            "arsinh": r"\arsinh",
-            "arcosh": r"\arcosh",
-            "artanh": r"\artanh",
-            "arcsch": r"\arcsch",
-            "arsech": r"\arsech",
-            "arcoth": r"\arcoth",
-            "floor": r"\lfloor \rfloor",
-            "ceil": r"\lceil \rceil"
+            "sin": cmath.sin,
+            "cos": cmath.cos,
+            "tan": cmath.tan,
+            "csc": lambda x: 1 / cmath.sin(x),
+            "sec": lambda x: 1 / cmath.cos(x),
+            "cot": lambda x: 1 / cmath.tan(x),
+            "sinh": cmath.sinh,
+            "cosh": cmath.cosh,
+            "tanh": cmath.tanh,
+            "csch": lambda x: 1 / cmath.sinh(x),
+            "sech": lambda x: 1 / cmath.cosh(x),
+            "coth": lambda x: 1 / cmath.tanh(x),
+            "arcsin": cmath.asin,
+            "arccos": cmath.acos,
+            "arctan": cmath.atan,
+            "arccsc": lambda x: cmath.asin(1 / x),
+            "arcsec": lambda x: cmath.acos(1 / x),
+            "arccot": lambda x: cmath.atan(1 / x),
+            "arsinh": cmath.asinh,
+            "arcosh": cmath.acosh,
+            "artanh": cmath.atanh,
+            "arcsch": lambda x: cmath.asinh(1 / x),
+            "arsech": lambda x: cmath.acosh(1 / x),
+            "arcoth": lambda x: cmath.atanh(1 / x),
+            "floor": math.floor,
+            "ceil": math.ceil,
         }
-    
+
+        if self.operator not in math_operator:
+            raise InvalidOperationError("Operation not supported.")
+
+        operation_function = math_operator[self.operator]
+        return operation_function(self.argument.evaluate)
